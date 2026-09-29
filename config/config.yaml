@@ -1,0 +1,4 @@
+rutas:
+  bronze: "data/1_bronze/1970-2021_DISASTERS.csv"
+  silver: "data/2_silver"
+  gold: "data/3_gold"
