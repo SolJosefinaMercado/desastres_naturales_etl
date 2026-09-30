@@ -60,10 +60,33 @@ def estacionalidad_mensual(df):
     tabla = df.groupby(df["fecha"].dt.month).size().reset_index()
     tabla.columns = ["mes", "cantidad_eventos"]
     return tabla
+
 def tendencia_anual(df):
     tabla = df.groupby(df["fecha"].dt.year).size().reset_index()
     tabla.columns = ["anio", "cantidad_eventos"]
     return tabla
+
+def tipo_predominante_por_pais(df):
+    tabla = (
+        df.groupby("country")["disaster_type"]
+        .value_counts()
+        .reset_index(name="cantidad")
+        .groupby("country")
+        .head(1)
+    )
+    return tabla
+
+def estacionalidad_argentina(df):
+    argentina = df[df["country"] == "Argentina"]
+    tabla = argentina.pivot_table(
+        index="disaster_type",
+        columns=argentina["fecha"].dt.month,
+        values="fecha",
+        aggfunc="count",
+        fill_value=0
+    )
+    return tabla
+
 def letalidad_por_disaster(df):
     tabla = (
         df.groupby("disaster_type")["total_deaths"]
@@ -72,6 +95,7 @@ def letalidad_por_disaster(df):
         .reset_index()
     )
     return tabla
+
 def construir_gold(ruta_silver, config):
     df = pd.read_parquet(ruta_silver)
     os.makedirs(config["rutas"]["gold"], exist_ok=True)
@@ -80,6 +104,8 @@ def construir_gold(ruta_silver, config):
         "estacionalidad_mensual": estacionalidad_mensual(df),
         "tendencia_anual": tendencia_anual(df),
         "letalidad_por_disaster": letalidad_por_disaster(df),
+        "estacionalidad_argentina": estacionalidad_argentina(df),
+        "tipo_predominante_por_pais": tipo_predominante_por_pais(df),
     }
 
     rutas = {}
@@ -89,14 +115,3 @@ def construir_gold(ruta_silver, config):
         rutas[nombre] = ruta
 
     return rutas
-
-
-if __name__ == "__main__":
-    from utils.configuracion import cargar_config
-
-    config = cargar_config()
-    ruta_silver = construir_silver(config["rutas"]["bronze"], config)
-    print("Silver listo:", ruta_silver)
-
-    rutas_gold = construir_gold(ruta_silver, config)
-    print("Gold listo:", rutas_gold)
