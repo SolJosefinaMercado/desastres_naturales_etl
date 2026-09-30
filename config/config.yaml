@@ -1,5 +1,4 @@
 rutas:
-  csv_raw: "data/1970-2021_DISASTERS.csv"
-  silver: "data/2_silver"
-  gold: "data/3_gold"
-  
+  bronze: "data/1970-2021_DISASTERS.csv"
+  silver: "data/silver/desastres_limpios.parquet"
+  gold: "data/gold"
